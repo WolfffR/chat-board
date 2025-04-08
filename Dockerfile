@@ -11,6 +11,7 @@ COPY public/themes/space-theme.css public/themes/space-theme.css
 COPY public/themes/paper-theme.css public/themes/paper-theme.css
 COPY public/themes/neon-theme.css public/themes/neon-theme.css
 
+COPY public/themes/paper.png themes/paper.png
 COPY public/themes/space-theme.css themes/space-theme.css
 COPY public/themes/paper-theme.css themes/paper-theme.css
 COPY public/themes/neon-theme.css themes/neon-theme.css
