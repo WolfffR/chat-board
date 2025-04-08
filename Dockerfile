@@ -1,23 +1,15 @@
-# Используем официальный образ Node.js
 FROM node:18-alpine
-
-# Создаем рабочую директорию
 WORKDIR /app
 
-# Копируем package.json и package-lock.json
+# 1. Копируем только package.json для оптимизации кэширования
 COPY package*.json ./
-
-# Устанавливаем зависимости
 RUN npm install
 
-# Копируем все файлы проекта
+# 2. Копируем ВСЕ файлы (включая public/themes)
 COPY . .
-COPY themes /app/public/themes
-# Собираем статические файлы (если нужно)
-# RUN npm run build
 
-# Открываем порт
+# 3. Убедимся, что темы скопировались правильно
+RUN ls -la public/themes/
+
 EXPOSE 3000
-
-# Запускаем приложение
 CMD ["node", "server.js"]
