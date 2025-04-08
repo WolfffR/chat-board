@@ -1,17 +1,20 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# 1. Копируем только package.json для оптимизации кэширования
+# 1. Копируем зависимости
 COPY package*.json ./
 RUN npm install
 
-# 2. Копируем ВСЕ файлы (включая public/themes)
-COPY . .
+# 2. Копируем основные файлы
+COPY server.js ./
+COPY public/index.html public/index.html
+COPY public/styles.css public/styles.css
 
-COPY public/themes/space-theme.css public/themes/space-theme.css
-COPY public/themes/paper-theme.css public/themes/paper-theme.css
-COPY public/themes/neon-theme.css public/themes/neon-theme.css
-# 3. Убедимся, что темы скопировались правильно
+# 3. Создаем папку themes и копируем файлы
+RUN mkdir -p public/themes
+COPY public/themes/*.css public/themes/
+
+# 4. Проверка
 RUN ls -la public/themes/
 
 EXPOSE 3000
