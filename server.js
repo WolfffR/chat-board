@@ -8,7 +8,11 @@ const io = new Server(server);
 
 let messages = [];
 
-app.use(express.static('public'));
+// Обслуживание статических файлов из папки public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Дополнительно явно указать путь для тем
+app.use('/themes', express.static(path.join(__dirname, 'public', 'themes')));
 
 io.on('connection', (socket) => {
     console.log(`Новое подключение: ${socket.id.slice(0, 5)}...`);
