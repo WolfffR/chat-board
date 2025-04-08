@@ -1,16 +1,40 @@
 body {
-    background: #111;
+    background: linear-gradient(-45deg, #051437, #023841, #310113, #193908);
+    background-size: 400% 400%;
+    animation: gradientBG 12s ease infinite;
+    color: #0ff;
 }
-
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
 .message {
-    background: #1a1a1a !important;
-    color: #0ff !important;
+    background: rgba(0, 0, 0, 0.7) !important;
     border: 1px solid #0ff !important;
-    box-shadow: 0 0 10px #0ff, inset 0 0 5px #0ff !important;
+    color: #0ff !important;
+    backdrop-filter: blur(2px);
+    /* text-shadow: 0 0 10px currentColor;
+    box-shadow: 0 0 20px currentColor; */
 }
 
 #messageInput {
-    background: #222;
-    color: #0ff;
-    border: 1px solid #0ff;
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: #0ff !important;
+    border: 1px solid #0ff !important;
+    box-shadow: 0 0 10px #0ff !important;
+}
+
+button {
+    background: transparent !important;
+    color: #0ff !important;
+    border: 1px solid #0ff !important;
+    box-shadow: 0 0 10px #0ff !important;
+    text-shadow: 0 0 5px #0ff;
 }

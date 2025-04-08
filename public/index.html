@@ -187,10 +187,50 @@
         #neon-theme {
             background: #0ff;
         }
+        .footer-signature {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s ease;
+        }
+
+.footer-signature:hover {
+    opacity: 0.8;
+}
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
     </style>
 </head>
 
 <body>
+    <div class="stars" id="stars"></div>
+    <div class="footer-signature">Made by Wolf</div>
     <div class="theme-switcher">
         <div class="theme-btn" id="default-theme" data-theme="Стандартная" onclick="changeTheme('')"></div>
         <div class="theme-btn" id="space-theme" data-theme="Космическая" onclick="changeTheme('space')"></div>
@@ -215,18 +255,43 @@
         const form = document.getElementById('messageForm');
         const input = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        const starsContainer = document.getElementById('stars');
         const timerProgress = document.getElementById('timerProgress');
+        
 
-        function changeTheme(themeName) {
-            const themeStyle = document.getElementById('theme-style');
-            themeStyle.href = themeName ? `/themes/${themeName}-theme.css` : '';
-            localStorage.setItem('selectedTheme', themeName);
 
-            socket.emit('themeChangeAttempt', {
-                theme: themeName || 'default',
-                timestamp: new Date().toISOString()
-            });
+    // Генерация звезд для космической темы
+        function createStars() {
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+                starsContainer.appendChild(star);
+            }
         }
+        function changeTheme(themeName) {
+                const themeStyle = document.getElementById('theme-style');
+                themeStyle.href = themeName ? `/themes/${themeName}-theme.css` : '';
+                localStorage.setItem('selectedTheme', themeName);
+
+                // Управление звёздами
+                if (themeName === 'space') {
+                    createStars(); // Создаём звёзды для космической темы
+                    document.getElementById('stars').style.display = 'block';
+                } else {
+                    document.getElementById('stars').style.display = 'none';
+                }
+
+                socket.emit('themeChangeAttempt', {
+                    theme: themeName || 'default',
+                    timestamp: new Date().toISOString()
+                });
+            }
 
         window.addEventListener('load', () => {
             const savedTheme = localStorage.getItem('selectedTheme');
@@ -255,16 +320,33 @@
             const position = getRandomPosition();
             div.style.left = `${position.left}px`;
             div.style.top = `${position.top}px`;
+
             const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#9412b5', '#0f4d15', '#8a7f0a'];
+            
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             div.style.backgroundColor = randomColor;
 
+            // Исправленная строка:
+            if (localStorage.getItem('selectedTheme') === 'space') {
+                div.style.boxShadow = `0 0 25px ${randomColor}`;
+            }
+            else if (localStorage.getItem('selectedTheme') === 'paper') {
+                div.style.boxShadow = `5px 5px 0 ${randomColor}`;
+            }
+            else if (localStorage.getItem('selectedTheme') === 'neon') {
+                div.style.boxShadow = `10px 4px 20px ${randomColor}`;
+                div.style.textshadow = `0 0 10px ${randomColor}`;
+            }
+            
+            
+            
             const rotation = (Math.random() * 10) - 5;
             div.style.transform += ` rotate(${rotation}deg)`;
 
             setTimeout(() => div.remove(), 10000);
             return div;
         }
+
 
         function addMessage(message) {
             messagesContainer.appendChild(createMessageElement(message.text));
@@ -273,11 +355,11 @@
         function startCooldown() {
             canSendMessage = false;
             sendButton.disabled = true;
-            let timeLeft = 5;
+            let timeLeft = 3;
 
             const timerInterval = setInterval(() => {
                 timeLeft -= 0.1;
-                timerProgress.style.width = `${100 - ((timeLeft / 5) * 100)}%`;
+                timerProgress.style.width = `${100 - ((timeLeft / 3) * 100)}%`;
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);

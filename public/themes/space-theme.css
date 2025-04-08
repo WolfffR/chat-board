@@ -1,16 +1,20 @@
 body {
-    background: #0f0c29;
-    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    background: #07021c !important;
 }
 
 .message {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: #0ff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 0 15px rgba(100, 149, 237, 0.5) !important;
+    background: rgba(47, 5, 58, 0.582) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+    backdrop-filter: blur(5px);
 }
 
 #messageInput {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+button {
+    background: #4a148c !important;
 }
