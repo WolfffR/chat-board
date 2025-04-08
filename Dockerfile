@@ -8,6 +8,9 @@ RUN npm install
 # 2. Копируем ВСЕ файлы (включая public/themes)
 COPY . .
 
+COPY public/themes/space-theme.css themes/space-theme.css
+COPY public/themes/paper-theme.css themes/paper-theme.css
+COPY public/themes/neon-theme.css themes/neon-theme.css
 # 3. Убедимся, что темы скопировались правильно
 RUN ls -la public/themes/
 
