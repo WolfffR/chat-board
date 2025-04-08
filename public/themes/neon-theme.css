@@ -1,0 +1,16 @@
+body {
+    background: #111;
+}
+
+.message {
+    background: #1a1a1a !important;
+    color: #0ff !important;
+    border: 1px solid #0ff !important;
+    box-shadow: 0 0 10px #0ff, inset 0 0 5px #0ff !important;
+}
+
+#messageInput {
+    background: #222;
+    color: #0ff;
+    border: 1px solid #0ff;
+}

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Летающие сообщения</title>
+    <link id="theme-style" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f0f2f5;
+            position: relative;
+        }
+
+        #messages-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+
+        .message {
+            position: absolute;
+            max-width: 250px;
+            padding: 12px 16px;
+            margin: 10px;
+            border-radius: 18px;
+            background-color: #0084ff;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation:
+                fadeIn 0.5s forwards,
+                floatUp 10s ease-in forwards;
+            word-break: break-word;
+            cursor: default;
+            user-select: none;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
+
+        #messageForm {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        #messageInput {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            outline: none;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #0066cc;
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            height: 100%;
+            background: #0084ff;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .theme-switcher {
+            position: fixed;
+            bottom: 90px;
+            left: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-btn::after {
+            content: attr(data-theme);
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .theme-btn:hover::after {
+            opacity: 1;
+        }
+
+        #default-theme {
+            background: #0084ff;
+        }
+
+        #space-theme {
+            background: #302b63;
+        }
+
+        #paper-theme {
+            background: #fff9c4;
+        }
+
+        #neon-theme {
+            background: #0ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-switcher">
+        <div class="theme-btn" id="default-theme" data-theme="Стандартная" onclick="changeTheme('')"></div>
+        <div class="theme-btn" id="space-theme" data-theme="Космическая" onclick="changeTheme('space')"></div>
+        <div class="theme-btn" id="paper-theme" data-theme="Бумажная" onclick="changeTheme('paper')"></div>
+        <div class="theme-btn" id="neon-theme" data-theme="Неоновая" onclick="changeTheme('neon')"></div>
+    </div>
+
+    <div id="messages-container"></div>
+
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Напишите сообщение..." required autocomplete="off">
+        <button type="submit" id="sendButton">Отправить</button>
+        <div class="timer">
+            <div class="timer-progress" id="timerProgress"></div>
+        </div>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const messagesContainer = document.getElementById('messages-container');
+        const form = document.getElementById('messageForm');
+        const input = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const timerProgress = document.getElementById('timerProgress');
+
+        function changeTheme(themeName) {
+            const themeStyle = document.getElementById('theme-style');
+            themeStyle.href = themeName ? `/themes/${themeName}-theme.css` : '';
+            localStorage.setItem('selectedTheme', themeName);
+
+            socket.emit('themeChangeAttempt', {
+                theme: themeName || 'default',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        window.addEventListener('load', () => {
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) {
+                changeTheme(savedTheme);
+            }
+            input.focus();
+        });
+
+        let canSendMessage = true;
+        let cooldownTimer = null;
+
+        function getRandomPosition() {
+            const containerWidth = messagesContainer.clientWidth;
+            const containerHeight = messagesContainer.clientHeight;
+            const left = Math.max(20, Math.min(containerWidth - 270, Math.random() * containerWidth));
+            const top = Math.max(20, Math.min(containerHeight - 100, Math.random() * containerHeight));
+            return { left, top };
+        }
+
+        function createMessageElement(text) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.textContent = text;
+
+            const position = getRandomPosition();
+            div.style.left = `${position.left}px`;
+            div.style.top = `${position.top}px`;
+            const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#9412b5', '#0f4d15', '#8a7f0a'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            div.style.backgroundColor = randomColor;
+
+            const rotation = (Math.random() * 10) - 5;
+            div.style.transform += ` rotate(${rotation}deg)`;
+
+            setTimeout(() => div.remove(), 10000);
+            return div;
+        }
+
+        function addMessage(message) {
+            messagesContainer.appendChild(createMessageElement(message.text));
+        }
+
+        function startCooldown() {
+            canSendMessage = false;
+            sendButton.disabled = true;
+            let timeLeft = 5;
+
+            const timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                timerProgress.style.width = `${100 - ((timeLeft / 5) * 100)}%`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    canSendMessage = true;
+                    sendButton.disabled = false;
+                    timerProgress.style.width = '0%';
+                }
+            }, 100);
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!canSendMessage) return;
+
+            const text = input.value.trim();
+            if (text) {
+                socket.emit('newMessage', text);
+                input.value = '';
+                input.focus();
+                startCooldown();
+            }
+        });
+
+        socket.on('newMessage', addMessage);
+        socket.on('initialMessages', (messages) => {
+            messages.forEach(msg => addMessage(msg));
+        });
+    </script>
+</body>
+
+</html>

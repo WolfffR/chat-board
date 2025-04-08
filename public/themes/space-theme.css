@@ -1,0 +1,16 @@
+body {
+    background: #0f0c29;
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+}
+
+.message {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #0ff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 15px rgba(100, 149, 237, 0.5) !important;
+}
+
+#messageInput {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
