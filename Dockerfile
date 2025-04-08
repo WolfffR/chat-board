@@ -12,7 +12,7 @@ RUN npm install
 
 # Копируем все файлы проекта
 COPY . .
-
+COPY themes /app/public/themes
 # Собираем статические файлы (если нужно)
 # RUN npm run build
 
