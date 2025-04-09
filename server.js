@@ -25,6 +25,11 @@ io.on('connection', (socket) => {
     socket.emit('initialMessages', messages.filter(msg => now - msg.timestamp < 10000));
 
     socket.on('newMessage', (messageText) => {
+        // Проверка длины сообщения
+        if (messageText.length > 200) {
+            socket.emit('messageError', 'Сообщение слишком длинное (макс. 200 символов)');
+            return;
+        }
         const newMessage = {
             id: Date.now().toString(),
             text: messageText,

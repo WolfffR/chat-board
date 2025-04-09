@@ -376,6 +376,11 @@
             if (!canSendMessage) return;
 
             const text = input.value.trim();
+             // Клиентская проверка длины
+            if (text.length > 200) {
+                alert('Сообщение слишком длинное (макс. 200 символов)');
+                return;
+            }
             if (text) {
                 socket.emit('newMessage', text);
                 input.value = '';
@@ -387,6 +392,13 @@
         socket.on('newMessage', addMessage);
         socket.on('initialMessages', (messages) => {
             messages.forEach(msg => addMessage(msg));
+        });
+    // Обработка ошибок с сервера
+        socket.on('messageError', (error) => {
+            alert(error); // Или лучше показать красивую ошибку в интерфейсе
+            canSendMessage = true; // Разблокируем кнопку
+            sendButton.disabled = false;
+            timerProgress.style.width = '0%';
         });
     </script>
 </body>
